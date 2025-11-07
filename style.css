@@ -1,0 +1,331 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Progress Section */
+.progress-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.round-indicator {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 12px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #e0e0e0;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 20px;
+}
+
+/* Battle Screen */
+.battle-screen {
+    display: block;
+}
+
+.battle-prompt {
+    text-align: center;
+    font-size: 1.3rem;
+    color: white;
+    margin-bottom: 30px;
+    font-weight: 500;
+}
+
+.cards-container {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Watch Cards */
+.watch-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    flex: 1;
+    min-width: 280px;
+    max-width: 400px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.watch-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.watch-card.winner-selected {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 4px #667eea;
+}
+
+.watch-image-container {
+    width: 100%;
+    height: 280px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.watch-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.watch-card:hover .watch-image {
+    transform: scale(1.1);
+}
+
+.watch-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.choose-btn {
+    width: 100%;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.choose-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.choose-btn:active {
+    transform: translateY(0);
+}
+
+/* VS Divider */
+.vs-divider {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Winner Screen */
+.winner-screen {
+    display: block;
+}
+
+.winner-screen.hidden,
+.battle-screen.hidden {
+    display: none;
+}
+
+.winner-container {
+    text-align: center;
+}
+
+.winner-title {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.winner-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    max-width: 500px;
+    margin: 0 auto 30px;
+}
+
+.winner-image-container {
+    width: 100%;
+    height: 400px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.winner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.winner-name {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 24px;
+}
+
+.restart-btn {
+    padding: 14px 36px;
+    background: white;
+    color: #667eea;
+    border: 2px solid white;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.restart-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    .battle-prompt {
+        font-size: 1.1rem;
+    }
+
+    .cards-container {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .watch-card {
+        max-width: 100%;
+        min-width: unset;
+    }
+
+    .vs-divider {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .watch-name {
+        font-size: 1.3rem;
+        min-height: 50px;
+    }
+
+    .winner-title {
+        font-size: 2rem;
+    }
+
+    .winner-card {
+        padding: 30px 20px;
+    }
+
+    .winner-image-container {
+        height: 300px;
+    }
+
+    .winner-name {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .progress-container {
+        padding: 15px;
+    }
+
+    .watch-card {
+        padding: 20px;
+    }
+
+    .watch-image-container {
+        height: 220px;
+    }
+
+    .watch-name {
+        font-size: 1.2rem;
+    }
+
+    .choose-btn {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+
+    .winner-image-container {
+        height: 250px;
+    }
+}

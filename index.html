@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Battle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Watch Battle</h1>
+            <div class="progress-container">
+                <p class="round-indicator">Round <span id="current-round">1</span> of 10</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Battle Screen -->
+            <div id="battle-screen" class="battle-screen">
+                <p class="battle-prompt">Choose your favorite watch!</p>
+                <div class="cards-container">
+                    <div class="watch-card" id="card-left" data-position="left">
+                        <div class="watch-image-container">
+                            <img src="" alt="" id="watch-image-left" class="watch-image">
+                        </div>
+                        <h2 class="watch-name" id="watch-name-left"></h2>
+                        <button class="choose-btn" onclick="selectWinner('left')">Choose This Watch</button>
+                    </div>
+
+                    <div class="vs-divider">
+                        <span>VS</span>
+                    </div>
+
+                    <div class="watch-card" id="card-right" data-position="right">
+                        <div class="watch-image-container">
+                            <img src="" alt="" id="watch-image-right" class="watch-image">
+                        </div>
+                        <h2 class="watch-name" id="watch-name-right"></h2>
+                        <button class="choose-btn" onclick="selectWinner('right')">Choose This Watch</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Winner Screen -->
+            <div id="winner-screen" class="winner-screen hidden">
+                <div class="winner-container">
+                    <h2 class="winner-title">Your Perfect Watch!</h2>
+                    <div class="winner-card">
+                        <div class="winner-image-container">
+                            <img src="" alt="" id="winner-image" class="winner-image">
+                        </div>
+                        <h3 class="winner-name" id="winner-name"></h3>
+                    </div>
+                    <button class="restart-btn" onclick="restartGame()">Play Again</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

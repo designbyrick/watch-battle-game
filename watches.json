@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "name": "Rolex Submariner",
+    "image": "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/rolex-submariner"
+  },
+  {
+    "id": 2,
+    "name": "Omega Speedmaster",
+    "image": "https://images.unsplash.com/photo-1611928482473-7b27d24eab80?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/omega-speedmaster"
+  },
+  {
+    "id": 3,
+    "name": "TAG Heuer Carrera",
+    "image": "https://images.unsplash.com/photo-1587836374616-21595d58c5d7?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/tag-heuer-carrera"
+  },
+  {
+    "id": 4,
+    "name": "Seiko Presage",
+    "image": "https://images.unsplash.com/photo-1622434641406-a158123450f9?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/seiko-presage"
+  },
+  {
+    "id": 5,
+    "name": "Casio G-Shock",
+    "image": "https://images.unsplash.com/photo-1617625802912-cdf52eafc42c?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/casio-gshock"
+  },
+  {
+    "id": 6,
+    "name": "Patek Philippe Nautilus",
+    "image": "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/patek-nautilus"
+  },
+  {
+    "id": 7,
+    "name": "Cartier Santos",
+    "image": "https://images.unsplash.com/photo-1609587312208-cea54be969e7?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/cartier-santos"
+  },
+  {
+    "id": 8,
+    "name": "Breitling Navitimer",
+    "image": "https://images.unsplash.com/photo-1620231969173-1b9a71b56c26?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/breitling-navitimer"
+  },
+  {
+    "id": 9,
+    "name": "Tudor Black Bay",
+    "image": "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/tudor-blackbay"
+  },
+  {
+    "id": 10,
+    "name": "IWC Pilot's Watch",
+    "image": "https://images.unsplash.com/photo-1547043736-e6e6c0c519d0?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/iwc-pilot"
+  },
+  {
+    "id": 11,
+    "name": "Panerai Luminor",
+    "image": "https://images.unsplash.com/photo-1601527601804-45c0c08c5554?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/panerai-luminor"
+  },
+  {
+    "id": 12,
+    "name": "Grand Seiko Snowflake",
+    "image": "https://images.unsplash.com/photo-1606390041148-c1e0e48ea39e?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/grand-seiko-snowflake"
+  },
+  {
+    "id": 13,
+    "name": "Audemars Piguet Royal Oak",
+    "image": "https://images.unsplash.com/photo-1548169874-53e85f753f1e?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/ap-royal-oak"
+  },
+  {
+    "id": 14,
+    "name": "Jaeger-LeCoultre Reverso",
+    "image": "https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/jlc-reverso"
+  },
+  {
+    "id": 15,
+    "name": "Hamilton Khaki Field",
+    "image": "https://images.unsplash.com/photo-1533139502658-0198f920d8e8?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/hamilton-khaki"
+  },
+  {
+    "id": 16,
+    "name": "Citizen Eco-Drive",
+    "image": "https://images.unsplash.com/photo-1585123334904-845d60e97e94?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/citizen-ecodrive"
+  },
+  {
+    "id": 17,
+    "name": "Zenith Chronomaster",
+    "image": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/zenith-chronomaster"
+  },
+  {
+    "id": 18,
+    "name": "Bell & Ross BR 03",
+    "image": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/bell-ross-br03"
+  },
+  {
+    "id": 19,
+    "name": "Longines Master Collection",
+    "image": "https://images.unsplash.com/photo-1639006570490-79c0c53f1080?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/longines-master"
+  },
+  {
+    "id": 20,
+    "name": "Oris Aquis",
+    "image": "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?w=400&h=400&fit=crop",
+    "affiliateLink": "https://example.com/oris-aquis"
+  }
+]
