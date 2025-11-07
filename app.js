@@ -37,8 +37,15 @@ const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ
 async function loadWatchData() {
     try {
         // Try loading from Google Sheets first
+        console.log('Fetching data from Google Sheets...');
         const response = await fetch(GOOGLE_SHEET_CSV_URL);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const csvText = await response.text();
+        console.log('CSV data received:', csvText.substring(0, 200) + '...'); // Log first 200 chars
 
         // Parse CSV and transform to watch objects
         allWatches = parseCSVToWatches(csvText);
@@ -47,6 +54,9 @@ async function loadWatchData() {
             throw new Error('No watches found in sheet');
         }
 
+        console.log(`Loaded ${allWatches.length} watches from Google Sheets`);
+        console.log('Sample watch:', allWatches[0]);
+
         // Shuffle the watches array for random matchups
         shuffleArray(allWatches);
     } catch (error) {
@@ -54,12 +64,15 @@ async function loadWatchData() {
 
         // Try fallback to local JSON file
         try {
+            console.log('Attempting to load from watches.json...');
             const response = await fetch('watches.json');
             allWatches = await response.json();
+            console.log(`Loaded ${allWatches.length} watches from JSON file`);
             shuffleArray(allWatches);
         } catch (jsonError) {
             console.error('Error loading JSON fallback:', jsonError);
             // Last resort: use sample data
+            console.log('Using sample data fallback (2 watches only)');
             allWatches = generateSampleData();
         }
     }
@@ -68,12 +81,15 @@ async function loadWatchData() {
 // Parse CSV data to watch objects
 function parseCSVToWatches(csvText) {
     const lines = csvText.trim().split('\n');
+    console.log(`Parsing ${lines.length} lines from CSV`);
 
     // Remove header row
     const headers = lines[0].split(',').map(h => h.trim());
+    console.log('Headers found:', headers);
+
     const dataRows = lines.slice(1);
 
-    const watches = dataRows.map(row => {
+    const watches = dataRows.map((row, index) => {
         // Parse CSV row (handles quoted values)
         const values = parseCSVRow(row);
 
@@ -84,7 +100,7 @@ function parseCSVToWatches(csvText) {
 
         // Transform to app format
         // Expected columns: id, style, retail price, brand, Name, Model, Image
-        return {
+        const transformed = {
             id: parseInt(watch.id) || 0,
             name: `${watch.brand} ${watch.Name} ${watch.Model}`.trim(),
             image: watch.Image,
@@ -93,8 +109,21 @@ function parseCSVToWatches(csvText) {
             style: watch.style,
             retailPrice: watch['retail price']
         };
-    }).filter(watch => watch.id && watch.name && watch.image);
 
+        if (index === 0) {
+            console.log('First watch parsed:', transformed);
+        }
+
+        return transformed;
+    }).filter(watch => {
+        const isValid = watch.id && watch.name && watch.image;
+        if (!isValid) {
+            console.warn('Filtered out invalid watch:', watch);
+        }
+        return isValid;
+    });
+
+    console.log(`Parsed ${watches.length} valid watches`);
     return watches;
 }
 
@@ -129,7 +158,7 @@ function generateSampleData() {
         {
             id: 1,
             name: "Rolex Submariner",
-            image: "https://via.placeholder.com/400x400/1a1a1a/ffffff?text=Watch+A",
+            image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=400&h=400&fit=crop",
             brand: "Rolex",
             model: "Submariner",
             style: "Dive",
@@ -138,7 +167,7 @@ function generateSampleData() {
         {
             id: 2,
             name: "Omega Speedmaster",
-            image: "https://via.placeholder.com/400x400/2a2a2a/ffffff?text=Watch+B",
+            image: "https://images.unsplash.com/photo-1611928482473-7b27d24eab80?w=400&h=400&fit=crop",
             brand: "Omega",
             model: "Speedmaster",
             style: "Chronograph",
