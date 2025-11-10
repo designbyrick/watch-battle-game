@@ -100,24 +100,39 @@ function filterWatchesByMode(mode) {
     if (mode === 'price') {
         // Group watches by price ranges
         const priceRanges = {
-            'under1000': { name: 'Under $1,000', watches: [] },
-            '1000to5000': { name: '$1,000 - $5,000', watches: [] },
+            'under100': { name: 'Under $100', watches: [] },
+            '100to200': { name: '$100 - $200', watches: [] },
+            '200to500': { name: '$200 - $500', watches: [] },
+            '500to1000': { name: '$500 - $1,000', watches: [] },
+            '1000to2500': { name: '$1,000 - $2,500', watches: [] },
+            '2500to5000': { name: '$2,500 - $5,000', watches: [] },
             '5000to10000': { name: '$5,000 - $10,000', watches: [] },
-            'over10000': { name: 'Over $10,000', watches: [] }
+            '10000to25000': { name: '$10,000 - $25,000', watches: [] },
+            'over25000': { name: 'Over $25,000', watches: [] }
         };
 
         allWatches.forEach(watch => {
             const priceStr = watch.retailPrice || '';
             const priceNum = parseFloat(priceStr.replace(/[^0-9.]/g, ''));
 
-            if (priceNum < 1000) {
-                priceRanges['under1000'].watches.push(watch);
+            if (priceNum < 100) {
+                priceRanges['under100'].watches.push(watch);
+            } else if (priceNum < 200) {
+                priceRanges['100to200'].watches.push(watch);
+            } else if (priceNum < 500) {
+                priceRanges['200to500'].watches.push(watch);
+            } else if (priceNum < 1000) {
+                priceRanges['500to1000'].watches.push(watch);
+            } else if (priceNum < 2500) {
+                priceRanges['1000to2500'].watches.push(watch);
             } else if (priceNum < 5000) {
-                priceRanges['1000to5000'].watches.push(watch);
+                priceRanges['2500to5000'].watches.push(watch);
             } else if (priceNum < 10000) {
                 priceRanges['5000to10000'].watches.push(watch);
+            } else if (priceNum < 25000) {
+                priceRanges['10000to25000'].watches.push(watch);
             } else {
-                priceRanges['over10000'].watches.push(watch);
+                priceRanges['over25000'].watches.push(watch);
             }
         });
 
@@ -139,28 +154,38 @@ function filterWatchesByMode(mode) {
     }
 
     if (mode === 'style') {
-        // Group watches by style
-        const styleCounts = {};
+        // Build a map of individual style tags to watches that have those tags
+        const styleTagToWatches = {};
+
         allWatches.forEach(watch => {
-            const style = watch.style || 'Unknown';
-            styleCounts[style] = (styleCounts[style] || 0) + 1;
+            const styleStr = watch.style || 'Unknown';
+            // Split by comma and trim whitespace to get individual style tags
+            const styleTags = styleStr.split(',').map(tag => tag.trim());
+
+            // Add this watch to each of its style tags
+            styleTags.forEach(tag => {
+                if (!styleTagToWatches[tag]) {
+                    styleTagToWatches[tag] = [];
+                }
+                styleTagToWatches[tag].push(watch);
+            });
         });
 
-        // Filter styles that have at least 2 watches
-        const validStyles = Object.entries(styleCounts)
-            .filter(([, count]) => count >= 2)
-            .map(([style, count]) => ({ style, count }));
+        // Filter to style tags that have at least 2 watches
+        const validStyleTags = Object.entries(styleTagToWatches)
+            .filter(([, watches]) => watches.length >= 2)
+            .map(([tag, watches]) => ({ tag, count: watches.length }));
 
-        if (validStyles.length === 0) {
-            console.log('No styles with enough watches, using all watches');
+        if (validStyleTags.length === 0) {
+            console.log('No style tags with enough watches, using all watches');
             return [...allWatches];
         }
 
-        // Randomly select one style from valid styles
-        const selectedStyle = validStyles[Math.floor(Math.random() * validStyles.length)];
+        // Randomly select one style tag from valid tags
+        const selectedStyleTag = validStyleTags[Math.floor(Math.random() * validStyleTags.length)];
 
-        console.log(`Randomly selected style: ${selectedStyle.style} with ${selectedStyle.count} watches`);
-        return allWatches.filter(watch => watch.style === selectedStyle.style);
+        console.log(`Randomly selected style tag: ${selectedStyleTag.tag} with ${selectedStyleTag.count} watches`);
+        return styleTagToWatches[selectedStyleTag.tag];
     }
 
     // Default to all watches
@@ -236,7 +261,7 @@ function parseCSVToWatches(csvText) {
         });
 
         // Transform to app format
-        // Expected columns: id, Style, Retail Price, Brand, Name, Model, images
+        // Expected columns: Style, Retail Price, Brand, Name, images
         // Handle multiple images - take the first one if comma-separated
         const imageUrl = watch.images ? watch.images.split(',')[0].trim() : '';
 
@@ -244,23 +269,21 @@ function parseCSVToWatches(csvText) {
         let displayName = '';
         const brandName = watch.Brand || '';
         const modelName = watch.Name || '';
-        const modelNumber = watch.Model || '';
 
         // Check if Name already starts with Brand to avoid duplication
         if (modelName.toLowerCase().startsWith(brandName.toLowerCase())) {
-            // Name already includes brand, just use Name and Model
-            displayName = `${modelName} ${modelNumber}`.trim();
+            // Name already includes brand, just use Name
+            displayName = modelName.trim();
         } else {
             // Name doesn't include brand, add it
-            displayName = `${brandName} ${modelName} ${modelNumber}`.trim();
+            displayName = `${brandName} ${modelName}`.trim();
         }
 
         const transformed = {
-            id: parseInt(watch.id) || 0,
+            id: index + 1, // Generate sequential ID
             name: displayName,
             image: imageUrl,
             brand: watch.Brand,
-            model: watch.Model,
             style: watch.Style,
             retailPrice: watch['Retail Price']
         };
@@ -271,7 +294,7 @@ function parseCSVToWatches(csvText) {
 
         return transformed;
     }).filter(watch => {
-        const isValid = watch.id && watch.name && watch.image;
+        const isValid = watch.name && watch.image;
         if (!isValid) {
             console.warn('Filtered out invalid watch:', watch);
         }
@@ -315,7 +338,6 @@ function generateSampleData() {
             name: "Rolex Submariner",
             image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=400&h=400&fit=crop",
             brand: "Rolex",
-            model: "Submariner",
             style: "Dive",
             retailPrice: "$8,000"
         },
@@ -324,7 +346,6 @@ function generateSampleData() {
             name: "Omega Speedmaster",
             image: "https://images.unsplash.com/photo-1611928482473-7b27d24eab80?w=400&h=400&fit=crop",
             brand: "Omega",
-            model: "Speedmaster",
             style: "Chronograph",
             retailPrice: "$6,000"
         }
