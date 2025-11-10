@@ -11,7 +11,10 @@
         <header>
             <h1>Watch Battle</h1>
             <div class="progress-container">
-                <p class="round-indicator">Round <span id="current-round">1</span> of 10</p>
+                <div class="progress-content">
+                    <p class="round-indicator">Round <span id="current-round">1</span> of 10</p>
+                    <button class="header-restart-btn" onclick="restartGame()">Play Again</button>
+                </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
@@ -19,28 +22,60 @@
         </header>
 
         <main>
+            <!-- Game Mode Selection Screen -->
+            <div id="mode-screen" class="mode-screen">
+                <div class="mode-container">
+                    <h2 class="mode-title">Choose Your Battle Mode</h2>
+                    <p class="mode-subtitle">Select how you want to battle watches</p>
+
+                    <div class="mode-buttons">
+                        <button class="mode-btn" onclick="selectGameMode('brand')">
+                            <div class="mode-icon">🏷️</div>
+                            <h3>Same Brand</h3>
+                            <p>Battle watches from the same brand</p>
+                        </button>
+
+                        <button class="mode-btn" onclick="selectGameMode('price')">
+                            <div class="mode-icon">💰</div>
+                            <h3>Similar Price</h3>
+                            <p>Battle watches in similar price ranges</p>
+                        </button>
+
+                        <button class="mode-btn" onclick="selectGameMode('style')">
+                            <div class="mode-icon">⚡</div>
+                            <h3>Same Style</h3>
+                            <p>Battle watches with the same style</p>
+                        </button>
+
+                        <button class="mode-btn" onclick="selectGameMode('random')">
+                            <div class="mode-icon">🎲</div>
+                            <h3>Random</h3>
+                            <p>Battle any watches randomly</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Battle Screen -->
-            <div id="battle-screen" class="battle-screen">
+            <div id="battle-screen" class="battle-screen hidden">
                 <p class="battle-prompt">Choose your favorite watch!</p>
                 <div class="cards-container">
-                    <div class="watch-card" id="card-left" data-position="left">
+                    <div class="watch-card" id="card-left" data-position="left" onclick="selectWinner('left')">
                         <div class="watch-image-container">
                             <img src="" alt="" id="watch-image-left" class="watch-image">
                         </div>
                         <h2 class="watch-name" id="watch-name-left"></h2>
-                        <button class="choose-btn" onclick="selectWinner('left')">Choose This Watch</button>
                     </div>
 
                     <div class="vs-divider">
                         <span>VS</span>
                     </div>
 
-                    <div class="watch-card" id="card-right" data-position="right">
+                    <div class="watch-card" id="card-right" data-position="right" onclick="selectWinner('right')">
                         <div class="watch-image-container">
                             <img src="" alt="" id="watch-image-right" class="watch-image">
                         </div>
                         <h2 class="watch-name" id="watch-name-right"></h2>
-                        <button class="choose-btn" onclick="selectWinner('right')">Choose This Watch</button>
                     </div>
                 </div>
             </div>
@@ -55,6 +90,38 @@
                         </div>
                         <h3 class="winner-name" id="winner-name"></h3>
                     </div>
+
+                    <!-- Round History -->
+                    <div class="round-history-container">
+                        <h3 class="history-title">Battle History</h3>
+                        <div id="round-history" class="round-history"></div>
+                    </div>
+
+                    <!-- Share Section -->
+                    <div class="share-container">
+                        <h3 class="share-title">Share Your Result!</h3>
+                        <p class="share-subtitle">Challenge your friends to find their perfect watch</p>
+                        <div class="share-buttons">
+                            <button class="share-btn twitter-btn" onclick="shareOnTwitter()">
+                                <span class="share-icon">𝕏</span>
+                                <span class="share-label">Share on X</span>
+                            </button>
+                            <button class="share-btn facebook-btn" onclick="shareOnFacebook()">
+                                <span class="share-icon">f</span>
+                                <span class="share-label">Share on Facebook</span>
+                            </button>
+                            <button class="share-btn whatsapp-btn" onclick="shareOnWhatsApp()">
+                                <span class="share-icon">💬</span>
+                                <span class="share-label">Share on WhatsApp</span>
+                            </button>
+                            <button class="share-btn copy-btn" onclick="copyLink()">
+                                <span class="share-icon">🔗</span>
+                                <span class="share-label">Copy Link</span>
+                            </button>
+                        </div>
+                        <p class="copy-feedback" id="copy-feedback"></p>
+                    </div>
+
                     <button class="restart-btn" onclick="restartGame()">Play Again</button>
                 </div>
             </div>

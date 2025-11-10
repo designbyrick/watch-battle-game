@@ -1,14 +1,20 @@
 // Game State
 let allWatches = [];
+let gameWatches = []; // Filtered watches based on game mode
+let gameMode = null; // Selected game mode: 'brand', 'price', 'style', or 'random'
 let currentRound = 1;
 const totalRounds = 10;
 let currentChampion = null; // The winner from the previous round
+let championPosition = null; // Track which side the champion is on ('left' or 'right')
 let usedWatches = []; // Watches that have already battled
 let currentPair = { left: null, right: null };
+let roundHistory = []; // Track winner and loser for each round
 
 // DOM Elements
+const modeScreen = document.getElementById('mode-screen');
 const battleScreen = document.getElementById('battle-screen');
 const winnerScreen = document.getElementById('winner-screen');
+const progressContainer = document.querySelector('.progress-container');
 const currentRoundDisplay = document.getElementById('current-round');
 const progressFill = document.getElementById('progress-fill');
 
@@ -27,7 +33,138 @@ const winnerName = document.getElementById('winner-name');
 // Initialize the game
 async function init() {
     await loadWatchData();
+    // Don't start the game yet - wait for mode selection
+    // Hide progress container on mode selection screen
+    progressContainer.style.display = 'none';
+}
+
+// Select game mode and start the battle
+function selectGameMode(mode) {
+    gameMode = mode;
+    console.log(`Game mode selected: ${mode}`);
+
+    // Filter watches based on selected mode
+    gameWatches = filterWatchesByMode(mode);
+
+    if (gameWatches.length < 2) {
+        alert(`Not enough watches for ${mode} mode. Switching to random mode.`);
+        gameMode = 'random';
+        gameWatches = [...allWatches];
+    }
+
+    console.log(`${gameWatches.length} watches available for this mode`);
+
+    // Shuffle the game watches
+    shuffleArray(gameWatches);
+
+    // Hide mode screen, show battle screen and progress
+    modeScreen.classList.add('hidden');
+    battleScreen.classList.remove('hidden');
+    progressContainer.style.display = 'block';
+
+    // Start the battle
     startNewRound();
+}
+
+// Filter watches based on game mode
+function filterWatchesByMode(mode) {
+    if (mode === 'random') {
+        return [...allWatches];
+    }
+
+    if (mode === 'brand') {
+        // Group watches by brand
+        const brandCounts = {};
+        allWatches.forEach(watch => {
+            const brand = watch.brand || 'Unknown';
+            brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+        });
+
+        // Filter brands that have at least 2 watches
+        const validBrands = Object.entries(brandCounts)
+            .filter(([, count]) => count >= 2)
+            .map(([brand, count]) => ({ brand, count }));
+
+        if (validBrands.length === 0) {
+            console.log('No brands with enough watches, using all watches');
+            return [...allWatches];
+        }
+
+        // Randomly select one brand from valid brands
+        const selectedBrand = validBrands[Math.floor(Math.random() * validBrands.length)];
+
+        console.log(`Randomly selected brand: ${selectedBrand.brand} with ${selectedBrand.count} watches`);
+        return allWatches.filter(watch => watch.brand === selectedBrand.brand);
+    }
+
+    if (mode === 'price') {
+        // Group watches by price ranges
+        const priceRanges = {
+            'under1000': { name: 'Under $1,000', watches: [] },
+            '1000to5000': { name: '$1,000 - $5,000', watches: [] },
+            '5000to10000': { name: '$5,000 - $10,000', watches: [] },
+            'over10000': { name: 'Over $10,000', watches: [] }
+        };
+
+        allWatches.forEach(watch => {
+            const priceStr = watch.retailPrice || '';
+            const priceNum = parseFloat(priceStr.replace(/[^0-9.]/g, ''));
+
+            if (priceNum < 1000) {
+                priceRanges['under1000'].watches.push(watch);
+            } else if (priceNum < 5000) {
+                priceRanges['1000to5000'].watches.push(watch);
+            } else if (priceNum < 10000) {
+                priceRanges['5000to10000'].watches.push(watch);
+            } else {
+                priceRanges['over10000'].watches.push(watch);
+            }
+        });
+
+        // Filter ranges that have at least 2 watches
+        const validRanges = Object.entries(priceRanges)
+            .filter(([, data]) => data.watches.length >= 2)
+            .map(([key, data]) => ({ key, ...data }));
+
+        if (validRanges.length === 0) {
+            console.log('No price ranges with enough watches, using all watches');
+            return [...allWatches];
+        }
+
+        // Randomly select one price range from valid ranges
+        const selectedRange = validRanges[Math.floor(Math.random() * validRanges.length)];
+
+        console.log(`Randomly selected price range: ${selectedRange.name} with ${selectedRange.watches.length} watches`);
+        return selectedRange.watches;
+    }
+
+    if (mode === 'style') {
+        // Group watches by style
+        const styleCounts = {};
+        allWatches.forEach(watch => {
+            const style = watch.style || 'Unknown';
+            styleCounts[style] = (styleCounts[style] || 0) + 1;
+        });
+
+        // Filter styles that have at least 2 watches
+        const validStyles = Object.entries(styleCounts)
+            .filter(([, count]) => count >= 2)
+            .map(([style, count]) => ({ style, count }));
+
+        if (validStyles.length === 0) {
+            console.log('No styles with enough watches, using all watches');
+            return [...allWatches];
+        }
+
+        // Randomly select one style from valid styles
+        const selectedStyle = validStyles[Math.floor(Math.random() * validStyles.length)];
+
+        console.log(`Randomly selected style: ${selectedStyle.style} with ${selectedStyle.count} watches`);
+        return allWatches.filter(watch => watch.style === selectedStyle.style);
+    }
+
+    // Default to all watches
+    return [...allWatches];
 }
 
 // Google Sheets CSV URL (published sheet)
@@ -99,15 +236,33 @@ function parseCSVToWatches(csvText) {
         });
 
         // Transform to app format
-        // Expected columns: id, style, retail price, brand, Name, Model, Image
+        // Expected columns: id, Style, Retail Price, Brand, Name, Model, images
+        // Handle multiple images - take the first one if comma-separated
+        const imageUrl = watch.images ? watch.images.split(',')[0].trim() : '';
+
+        // Construct the display name, avoiding brand duplication
+        let displayName = '';
+        const brandName = watch.Brand || '';
+        const modelName = watch.Name || '';
+        const modelNumber = watch.Model || '';
+
+        // Check if Name already starts with Brand to avoid duplication
+        if (modelName.toLowerCase().startsWith(brandName.toLowerCase())) {
+            // Name already includes brand, just use Name and Model
+            displayName = `${modelName} ${modelNumber}`.trim();
+        } else {
+            // Name doesn't include brand, add it
+            displayName = `${brandName} ${modelName} ${modelNumber}`.trim();
+        }
+
         const transformed = {
             id: parseInt(watch.id) || 0,
-            name: `${watch.brand} ${watch.Name} ${watch.Model}`.trim(),
-            image: watch.Image,
-            brand: watch.brand,
+            name: displayName,
+            image: imageUrl,
+            brand: watch.Brand,
             model: watch.Model,
-            style: watch.style,
-            retailPrice: watch['retail price']
+            style: watch.Style,
+            retailPrice: watch['Retail Price']
         };
 
         if (index === 0) {
@@ -197,7 +352,25 @@ function startNewRound() {
 
     // Get two random watches for this round
     const pair = getRandomPair();
+
+    // Check if we ran out of watches in this game mode
+    if (pair === null) {
+        console.log('No more watches available in this mode. Tournament ends early.');
+        showFinalWinner();
+        return;
+    }
+
     currentPair = pair;
+
+    // Debug logging
+    console.log(`Round ${currentRound}:`);
+    if (currentRound === 1) {
+        console.log('Left:', pair.left.name);
+        console.log('Right:', pair.right.name);
+    } else {
+        console.log('Left:', pair.left.name, championPosition === 'left' ? '(Champion)' : '(Challenger)');
+        console.log('Right:', pair.right.name, championPosition === 'right' ? '(Champion)' : '(Challenger)');
+    }
 
     // Display the watches
     displayWatches(pair.left, pair.right);
@@ -212,39 +385,47 @@ function getRandomPair() {
     let left, right;
 
     if (currentRound === 1) {
-        // First round: pick any two random watches
-        const leftIndex = Math.floor(Math.random() * allWatches.length);
-        left = allWatches[leftIndex];
+        // First round: pick any two random watches from gameWatches
+        const leftIndex = Math.floor(Math.random() * gameWatches.length);
+        left = gameWatches[leftIndex];
 
         // Mark the first watch as used
         usedWatches.push(left);
 
         // Get available watches (not yet used)
-        const availableWatches = allWatches.filter(w => !usedWatches.some(u => u.id === w.id));
+        const availableWatches = gameWatches.filter(w => !usedWatches.some(u => u.id === w.id));
         const rightIndex = Math.floor(Math.random() * availableWatches.length);
         right = availableWatches[rightIndex];
 
         // Mark the second watch as used
         usedWatches.push(right);
     } else {
-        // Subsequent rounds: current champion vs a new challenger
-        left = currentChampion;
-
+        // Subsequent rounds: champion stays in same position, new challenger on the other side
         // Get watches that haven't been used yet
-        const availableWatches = allWatches.filter(w => !usedWatches.some(u => u.id === w.id));
+        const availableWatches = gameWatches.filter(w => !usedWatches.some(u => u.id === w.id));
 
-        // If no unused watches, reset and use from all watches
+        // Check if we have any unused watches left
         if (availableWatches.length === 0) {
-            const poolCopy = allWatches.filter(w => w.id !== currentChampion.id);
-            const rightIndex = Math.floor(Math.random() * poolCopy.length);
-            right = poolCopy[rightIndex];
-        } else {
-            const rightIndex = Math.floor(Math.random() * availableWatches.length);
-            right = availableWatches[rightIndex];
+            // No more watches available in this game mode - tournament ends
+            console.log('No unused watches remaining in this game mode');
+            return null;
         }
 
+        // Get new challenger from available watches
+        const challengerIndex = Math.floor(Math.random() * availableWatches.length);
+        const challenger = availableWatches[challengerIndex];
+
         // Mark the new challenger as used
-        usedWatches.push(right);
+        usedWatches.push(challenger);
+
+        // Place champion and challenger based on championPosition
+        if (championPosition === 'left') {
+            left = currentChampion;
+            right = challenger;
+        } else {
+            left = challenger;
+            right = currentChampion;
+        }
     }
 
     return { left, right };
@@ -264,13 +445,26 @@ function displayWatches(leftWatch, rightWatch) {
 // Handle winner selection
 function selectWinner(position) {
     const winner = position === 'left' ? currentPair.left : currentPair.right;
+    const loser = position === 'left' ? currentPair.right : currentPair.left;
+
+    // Record this round in history
+    roundHistory.push({
+        round: currentRound,
+        winner: winner,
+        loser: loser
+    });
+
+    // Debug logging
+    console.log(`Selected ${position} watch: ${winner.name}`);
+    console.log(`This watch will stay on the ${position.toUpperCase()} in the next round`);
 
     // Add visual feedback
     const selectedCard = position === 'left' ? cardLeft : cardRight;
     selectedCard.classList.add('winner-selected');
 
-    // Set as the current champion for the next round
+    // Set as the current champion and track their position
     currentChampion = winner;
+    championPosition = position;
 
     // Wait a bit for animation, then move to next round
     setTimeout(() => {
@@ -295,12 +489,51 @@ function showFinalWinner() {
     winnerImage.alt = finalWinner.name;
     winnerName.textContent = finalWinner.name;
 
-    // Hide battle screen, show winner screen
+    // Display round history
+    displayRoundHistory();
+
+    // Hide battle screen and progress, show winner screen
     battleScreen.classList.add('hidden');
+    progressContainer.style.display = 'none';
     winnerScreen.classList.remove('hidden');
 
     // Update progress bar to 100%
     progressFill.style.width = '100%';
+}
+
+// Display the round-by-round history
+function displayRoundHistory() {
+    const historyContainer = document.getElementById('round-history');
+
+    if (!historyContainer) {
+        console.warn('Round history container not found');
+        return;
+    }
+
+    // Clear existing content
+    historyContainer.innerHTML = '';
+
+    // Create history list
+    roundHistory.forEach(record => {
+        const roundItem = document.createElement('div');
+        roundItem.className = 'round-history-item';
+
+        roundItem.innerHTML = `
+            <div class="round-number">Round ${record.round}</div>
+            <div class="round-result">
+                <div class="winner-info">
+                    <span class="result-label">Winner:</span>
+                    <span class="watch-name-history">${record.winner.name}</span>
+                </div>
+                <div class="loser-info">
+                    <span class="result-label">Loser:</span>
+                    <span class="watch-name-history">${record.loser.name}</span>
+                </div>
+            </div>
+        `;
+
+        historyContainer.appendChild(roundItem);
+    });
 }
 
 // Restart the game
@@ -308,17 +541,74 @@ function restartGame() {
     // Reset game state
     currentRound = 1;
     currentChampion = null;
+    championPosition = null;
     usedWatches = [];
+    gameMode = null;
+    gameWatches = [];
+    roundHistory = [];
 
-    // Reshuffle watches
-    shuffleArray(allWatches);
-
-    // Hide winner screen, show battle screen
+    // Hide winner screen and progress, show mode selection screen
     winnerScreen.classList.add('hidden');
-    battleScreen.classList.remove('hidden');
+    battleScreen.classList.add('hidden');
+    progressContainer.style.display = 'none';
+    modeScreen.classList.remove('hidden');
+}
 
-    // Start new game
-    startNewRound();
+// Share functions
+function getShareMessage() {
+    const winner = currentChampion;
+    const gameUrl = window.location.href.split('?')[0]; // Remove any query params
+
+    return {
+        text: `I just found my perfect watch: ${winner.name}! 🎯⌚\n\nPlay Watch Battle and discover your dream timepiece!`,
+        url: gameUrl,
+        hashtags: 'WatchBattle,Watches,LuxuryWatches'
+    };
+}
+
+function shareOnTwitter() {
+    const share = getShareMessage();
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(share.text)}&url=${encodeURIComponent(share.url)}&hashtags=${share.hashtags}`;
+    window.open(twitterUrl, '_blank', 'width=550,height=420');
+}
+
+function shareOnFacebook() {
+    const share = getShareMessage();
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(share.url)}&quote=${encodeURIComponent(share.text)}`;
+    window.open(facebookUrl, '_blank', 'width=550,height=420');
+}
+
+function shareOnWhatsApp() {
+    const share = getShareMessage();
+    const whatsappText = `${share.text}\n\n${share.url}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+function copyLink() {
+    const share = getShareMessage();
+    const fullText = `${share.text}\n\n${share.url}`;
+
+    navigator.clipboard.writeText(fullText).then(() => {
+        // Show feedback
+        const feedback = document.getElementById('copy-feedback');
+        feedback.textContent = 'Copied to clipboard!';
+        feedback.style.display = 'block';
+
+        // Hide feedback after 3 seconds
+        setTimeout(() => {
+            feedback.style.display = 'none';
+        }, 3000);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        const feedback = document.getElementById('copy-feedback');
+        feedback.textContent = 'Failed to copy. Please try again.';
+        feedback.style.display = 'block';
+
+        setTimeout(() => {
+            feedback.style.display = 'none';
+        }, 3000);
+    });
 }
 
 // Start the game when page loads
