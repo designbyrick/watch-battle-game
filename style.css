@@ -121,7 +121,75 @@ h1 {
 .mode-subtitle {
     color: #4b5563;
     font-size: 1.2rem;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
+}
+
+/* Round Selection */
+.round-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.round-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.round-input-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.round-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.round-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.round-btn:active {
+    transform: scale(0.95);
+}
+
+.round-input {
+    width: 60px;
+    height: 40px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1f2937;
+    border: 2px solid #4b5563;
+    border-radius: 8px;
+    background: white;
+    cursor: default;
+}
+
+.round-input:focus {
+    outline: none;
+    border-color: #374151;
 }
 
 .mode-buttons {
@@ -533,6 +601,27 @@ h1 {
         grid-template-columns: 1fr;
     }
 
+    .round-selection {
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+
+    .round-label {
+        font-size: 0.95rem;
+    }
+
+    .round-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .round-input {
+        width: 55px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
     .progress-content {
         flex-direction: column;
         gap: 10px;
@@ -633,6 +722,27 @@ h1 {
 
     h1 {
         font-size: 1.8rem;
+    }
+
+    .round-selection {
+        padding: 14px;
+        margin-bottom: 20px;
+    }
+
+    .round-label {
+        font-size: 0.9rem;
+    }
+
+    .round-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 1rem;
+    }
+
+    .round-input {
+        width: 50px;
+        height: 34px;
+        font-size: 1rem;
     }
 
     .progress-container {

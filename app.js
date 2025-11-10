@@ -3,7 +3,7 @@ let allWatches = [];
 let gameWatches = []; // Filtered watches based on game mode
 let gameMode = null; // Selected game mode: 'brand', 'price', 'style', or 'random'
 let currentRound = 1;
-const totalRounds = 10;
+let totalRounds = 10; // Default value, can be changed by user (5-10)
 let currentChampion = null; // The winner from the previous round
 let championPosition = null; // Track which side the champion is on ('left' or 'right')
 let usedWatches = []; // Watches that have already battled
@@ -38,10 +38,33 @@ async function init() {
     progressContainer.style.display = 'none';
 }
 
+// Round selection functions
+function increaseRounds() {
+    const roundInput = document.getElementById('round-count');
+    let currentValue = parseInt(roundInput.value);
+    if (currentValue < 10) {
+        roundInput.value = currentValue + 1;
+    }
+}
+
+function decreaseRounds() {
+    const roundInput = document.getElementById('round-count');
+    let currentValue = parseInt(roundInput.value);
+    if (currentValue > 5) {
+        roundInput.value = currentValue - 1;
+    }
+}
+
 // Select game mode and start the battle
 function selectGameMode(mode) {
     gameMode = mode;
+
+    // Get selected number of rounds
+    const roundInput = document.getElementById('round-count');
+    totalRounds = parseInt(roundInput.value);
+
     console.log(`Game mode selected: ${mode}`);
+    console.log(`Total rounds: ${totalRounds}`);
 
     // Filter watches based on selected mode
     gameWatches = filterWatchesByMode(mode);
@@ -567,6 +590,13 @@ function restartGame() {
     gameMode = null;
     gameWatches = [];
     roundHistory = [];
+    totalRounds = 10; // Reset to default
+
+    // Reset round selector to default
+    const roundInput = document.getElementById('round-count');
+    if (roundInput) {
+        roundInput.value = 10;
+    }
 
     // Hide winner screen and progress, show mode selection screen
     winnerScreen.classList.add('hidden');

@@ -28,6 +28,16 @@
                     <h2 class="mode-title">Choose Your Battle Mode</h2>
                     <p class="mode-subtitle">Select how you want to battle watches</p>
 
+                    <!-- Round Selection -->
+                    <div class="round-selection">
+                        <label for="round-count" class="round-label">Number of Rounds:</label>
+                        <div class="round-input-container">
+                            <button class="round-btn decrease-btn" onclick="decreaseRounds()">-</button>
+                            <input type="number" id="round-count" class="round-input" min="5" max="10" value="10" readonly>
+                            <button class="round-btn increase-btn" onclick="increaseRounds()">+</button>
+                        </div>
+                    </div>
+
                     <div class="mode-buttons">
                         <button class="mode-btn" onclick="selectGameMode('brand')">
                             <div class="mode-icon">🏷️</div>
