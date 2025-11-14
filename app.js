@@ -34,9 +34,19 @@ const winnerName = document.getElementById('winner-name');
 // Initialize the game
 async function init() {
     await loadWatchData();
-    // Don't start the game yet - wait for mode selection
-    // Hide progress container on mode selection screen
-    progressContainer.style.display = 'none';
+
+    // Check for mode parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const modeParam = urlParams.get('mode');
+
+    if (modeParam && ['brand', 'price', 'style', 'random'].includes(modeParam)) {
+        // Auto-start the game with the specified mode
+        selectGameMode(modeParam);
+    } else {
+        // Don't start the game yet - wait for mode selection
+        // Hide progress container on mode selection screen
+        progressContainer.style.display = 'none';
+    }
 }
 
 // Initialize progress dots
@@ -615,12 +625,15 @@ function restartGame() {
 // Share functions
 function getShareMessage() {
     const winner = currentChampion;
-    const gameUrl = window.location.href.split('?')[0]; // Remove any query params
+    const baseUrl = window.location.href.split('?')[0]; // Remove any query params
+    const gameUrl = `${baseUrl}?mode=${gameMode}`; // Add mode parameter
+
+    const modeText = modeNames[gameMode] || 'Random'; // Get friendly mode name
 
     return {
-        text: `I just found my perfect watch: ${winner.name}! 🎯⌚\n\nPlay Watch Battle and discover your dream timepiece!`,
+        text: `I just found my perfect watch: ${winner.name} in ${modeText} mode! 🎯⌚\n\nPlay The Watch Match and discover your dream timepiece!`,
         url: gameUrl,
-        hashtags: 'WatchBattle,Watches,LuxuryWatches'
+        hashtags: 'TheWatchMatch,Watches,LuxuryWatches'
     };
 }
 
