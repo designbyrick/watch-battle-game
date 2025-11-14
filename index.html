@@ -30,6 +30,7 @@
     <meta name="theme-color" content="#f3f4f6">
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -94,7 +95,7 @@
                     <div class="intro-text">
                         <p>Discover your perfect timepiece through head-to-head comparisons. Choose your favorite watch in each round and find the one that truly speaks to you.</p>
                     </div>
-                    <h2 class="mode-title">Choose your battle mode to start</h2>
+                    <h2>Choose your battle mode to start</h2>
                     <div class="mode-buttons">
                         <button class="mode-btn" onclick="selectGameMode('brand')">
                             <div class="mode-icon">🏷️</div>
@@ -157,6 +158,9 @@
 
             <!-- Winner Screen -->
             <section id="winner-screen" class="winner-screen hidden">
+                <!-- Confetti Container -->
+                <div id="confetti-container" class="confetti-container"></div>
+
                 <div class="winner-container">
                     <h2 class="winner-title">The winner is...</h2>
                     <div class="winner-card">

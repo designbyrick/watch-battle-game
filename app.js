@@ -10,6 +10,14 @@ let usedWatches = []; // Watches that have already battled
 let currentPair = { left: null, right: null };
 let roundHistory = []; // Track winner and loser for each round
 
+// Mode display names
+const modeNames = {
+    'brand': 'Same Brand',
+    'price': 'Similar Price',
+    'style': 'Same Style',
+    'random': 'Random'
+};
+
 // DOM Elements
 const modeScreen = document.getElementById('mode-screen');
 const battleScreen = document.getElementById('battle-screen');
@@ -95,12 +103,6 @@ function selectGameMode(mode) {
     shuffleArray(gameWatches);
 
     // Set battle mode indicator text
-    const modeNames = {
-        'brand': 'Same Brand',
-        'price': 'Similar Price',
-        'style': 'Same Style',
-        'random': 'Random'
-    };
     battleModeIndicator.textContent = `Battle Mode: ${modeNames[gameMode]}`;
 
     // Initialize progress dots
@@ -109,7 +111,7 @@ function selectGameMode(mode) {
     // Hide mode screen, show battle screen and progress
     modeScreen.classList.add('hidden');
     battleScreen.classList.remove('hidden');
-    progressContainer.style.display = 'block';
+    progressContainer.style.display = 'flex';
 
     // Start the battle
     startNewRound();
@@ -567,6 +569,11 @@ function showFinalWinner() {
         dot.classList.remove('current');
         dot.classList.add('completed');
     });
+
+    // Trigger confetti animation
+    setTimeout(() => {
+        triggerConfetti();
+    }, 300); // Small delay for screen transition
 }
 
 // Display the round-by-round history
@@ -624,6 +631,11 @@ function restartGame() {
 
 // Share functions
 function getShareMessage() {
+    if (!currentChampion) {
+        console.error('No champion selected yet');
+        return null;
+    }
+
     const winner = currentChampion;
     const baseUrl = window.location.href.split('?')[0]; // Remove any query params
     const gameUrl = `${baseUrl}?mode=${gameMode}`; // Add mode parameter
@@ -639,18 +651,24 @@ function getShareMessage() {
 
 function shareOnTwitter() {
     const share = getShareMessage();
+    if (!share) return;
+
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(share.text)}&url=${encodeURIComponent(share.url)}&hashtags=${share.hashtags}`;
     window.open(twitterUrl, '_blank', 'width=550,height=420');
 }
 
 function shareOnFacebook() {
     const share = getShareMessage();
+    if (!share) return;
+
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(share.url)}&quote=${encodeURIComponent(share.text)}`;
     window.open(facebookUrl, '_blank', 'width=550,height=420');
 }
 
 function shareOnWhatsApp() {
     const share = getShareMessage();
+    if (!share) return;
+
     const whatsappText = `${share.text}\n\n${share.url}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
     window.open(whatsappUrl, '_blank');
@@ -658,6 +676,8 @@ function shareOnWhatsApp() {
 
 function copyLink() {
     const share = getShareMessage();
+    if (!share) return;
+
     const fullText = `${share.text}\n\n${share.url}`;
 
     navigator.clipboard.writeText(fullText).then(() => {
@@ -680,6 +700,24 @@ function copyLink() {
             feedback.style.display = 'none';
         }, 3000);
     });
+}
+
+// Confetti animation
+function triggerConfetti() {
+    const confettiContainer = document.getElementById('confetti-container');
+    confettiContainer.innerHTML = ''; // Clear any existing confetti
+
+    // Create 30 confetti pieces
+    for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confettiContainer.appendChild(confetti);
+    }
+
+    // Remove confetti after animation completes
+    setTimeout(() => {
+        confettiContainer.innerHTML = '';
+    }, 4000);
 }
 
 // Start the game when page loads
