@@ -3,7 +3,7 @@ let allWatches = [];
 let gameWatches = []; // Filtered watches based on game mode
 let gameMode = null; // Selected game mode: 'brand', 'price', 'style', or 'random'
 let currentRound = 1;
-let totalRounds = 10; // Default value, can be changed by user (5-10)
+const totalRounds = 10;
 let currentChampion = null; // The winner from the previous round
 let championPosition = null; // Track which side the champion is on ('left' or 'right')
 let usedWatches = []; // Watches that have already battled
@@ -16,7 +16,8 @@ const battleScreen = document.getElementById('battle-screen');
 const winnerScreen = document.getElementById('winner-screen');
 const progressContainer = document.querySelector('.progress-container');
 const currentRoundDisplay = document.getElementById('current-round');
-const progressFill = document.getElementById('progress-fill');
+const progressDotsContainer = document.getElementById('progress-dots');
+const battleModeIndicator = document.getElementById('battle-mode-indicator');
 
 // Watch card elements
 const watchImageLeft = document.getElementById('watch-image-left');
@@ -38,33 +39,36 @@ async function init() {
     progressContainer.style.display = 'none';
 }
 
-// Round selection functions
-function increaseRounds() {
-    const roundInput = document.getElementById('round-count');
-    let currentValue = parseInt(roundInput.value);
-    if (currentValue < 10) {
-        roundInput.value = currentValue + 1;
+// Initialize progress dots
+function initializeProgressDots() {
+    progressDotsContainer.innerHTML = '';
+    for (let i = 0; i < totalRounds; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        dot.dataset.round = i + 1;
+        progressDotsContainer.appendChild(dot);
     }
 }
 
-function decreaseRounds() {
-    const roundInput = document.getElementById('round-count');
-    let currentValue = parseInt(roundInput.value);
-    if (currentValue > 5) {
-        roundInput.value = currentValue - 1;
-    }
+// Update progress dots
+function updateProgressDots() {
+    const dots = progressDotsContainer.querySelectorAll('.progress-dot');
+    dots.forEach((dot, index) => {
+        const roundNum = index + 1;
+        dot.classList.remove('completed', 'current');
+
+        if (roundNum < currentRound) {
+            dot.classList.add('completed');
+        } else if (roundNum === currentRound) {
+            dot.classList.add('current');
+        }
+    });
 }
 
 // Select game mode and start the battle
 function selectGameMode(mode) {
     gameMode = mode;
-
-    // Get selected number of rounds
-    const roundInput = document.getElementById('round-count');
-    totalRounds = parseInt(roundInput.value);
-
     console.log(`Game mode selected: ${mode}`);
-    console.log(`Total rounds: ${totalRounds}`);
 
     // Filter watches based on selected mode
     gameWatches = filterWatchesByMode(mode);
@@ -79,6 +83,18 @@ function selectGameMode(mode) {
 
     // Shuffle the game watches
     shuffleArray(gameWatches);
+
+    // Set battle mode indicator text
+    const modeNames = {
+        'brand': 'Same Brand',
+        'price': 'Similar Price',
+        'style': 'Same Style',
+        'random': 'Random'
+    };
+    battleModeIndicator.textContent = `Battle Mode: ${modeNames[gameMode]}`;
+
+    // Initialize progress dots
+    initializeProgressDots();
 
     // Hide mode screen, show battle screen and progress
     modeScreen.classList.add('hidden');
@@ -392,7 +408,7 @@ function startNewRound() {
 
     // Update UI
     currentRoundDisplay.textContent = currentRound;
-    updateProgressBar();
+    updateProgressDots();
 
     // Get two random watches for this round
     const pair = getRandomPair();
@@ -478,11 +494,11 @@ function getRandomPair() {
 // Display watches on cards
 function displayWatches(leftWatch, rightWatch) {
     watchImageLeft.src = leftWatch.image;
-    watchImageLeft.alt = leftWatch.name;
+    watchImageLeft.alt = `${leftWatch.name} luxury watch - Compare and choose in Watch Battle`;
     watchNameLeft.textContent = leftWatch.name;
 
     watchImageRight.src = rightWatch.image;
-    watchImageRight.alt = rightWatch.name;
+    watchImageRight.alt = `${rightWatch.name} luxury watch - Compare and choose in Watch Battle`;
     watchNameRight.textContent = rightWatch.name;
 }
 
@@ -517,12 +533,6 @@ function selectWinner(position) {
     }, 500);
 }
 
-// Update progress bar
-function updateProgressBar() {
-    const progress = ((currentRound - 1) / totalRounds) * 100;
-    progressFill.style.width = progress + '%';
-}
-
 // Show final winner
 function showFinalWinner() {
     // The current champion is the final winner
@@ -530,7 +540,7 @@ function showFinalWinner() {
 
     // Update winner screen
     winnerImage.src = finalWinner.image;
-    winnerImage.alt = finalWinner.name;
+    winnerImage.alt = `${finalWinner.name} - Your perfect watch choice from Watch Battle`;
     winnerName.textContent = finalWinner.name;
 
     // Display round history
@@ -541,8 +551,12 @@ function showFinalWinner() {
     progressContainer.style.display = 'none';
     winnerScreen.classList.remove('hidden');
 
-    // Update progress bar to 100%
-    progressFill.style.width = '100%';
+    // Mark all dots as completed
+    const dots = progressDotsContainer.querySelectorAll('.progress-dot');
+    dots.forEach(dot => {
+        dot.classList.remove('current');
+        dot.classList.add('completed');
+    });
 }
 
 // Display the round-by-round history
@@ -590,13 +604,6 @@ function restartGame() {
     gameMode = null;
     gameWatches = [];
     roundHistory = [];
-    totalRounds = 10; // Reset to default
-
-    // Reset round selector to default
-    const roundInput = document.getElementById('round-count');
-    if (roundInput) {
-        roundInput.value = 10;
-    }
 
     // Hide winner screen and progress, show mode selection screen
     winnerScreen.classList.add('hidden');
