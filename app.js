@@ -1,3 +1,6 @@
+// Cookie Consent State
+let analyticsEnabled = false;
+
 // Game State
 let allWatches = [];
 let gameWatches = []; // Filtered watches based on game mode
@@ -87,6 +90,12 @@ function updateProgressDots() {
 function selectGameMode(mode) {
     gameMode = mode;
     console.log(`Game mode selected: ${mode}`);
+
+    // Track game mode selection
+    trackEvent('game_mode_selected', {
+        game_mode: mode,
+        mode_name: modeNames[mode]
+    });
 
     // Filter watches based on selected mode
     gameWatches = filterWatchesByMode(mode);
@@ -538,6 +547,14 @@ function selectWinner(position) {
     currentChampion = winner;
     championPosition = position;
 
+    // Track watch selection
+    trackEvent('watch_selected', {
+        round: currentRound,
+        watch_name: winner.name,
+        watch_brand: winner.brand,
+        game_mode: gameMode
+    });
+
     // Wait a bit for animation, then move to next round
     setTimeout(() => {
         currentRound++;
@@ -557,6 +574,14 @@ function showFinalWinner() {
 
     // Display round history
     displayRoundHistory();
+
+    // Track game completion
+    trackEvent('game_completed', {
+        winner_name: finalWinner.name,
+        winner_brand: finalWinner.brand,
+        game_mode: gameMode,
+        total_rounds: totalRounds
+    });
 
     // Hide battle screen and progress, show winner screen
     battleScreen.classList.add('hidden');
@@ -593,19 +618,51 @@ function displayRoundHistory() {
         const roundItem = document.createElement('div');
         roundItem.className = 'round-history-item';
 
-        roundItem.innerHTML = `
-            <div class="round-number">Round ${record.round}</div>
-            <div class="round-result">
-                <div class="winner-info">
-                    <span class="result-label">Winner:</span>
-                    <span class="watch-name-history">${record.winner.name}</span>
-                </div>
-                <div class="loser-info">
-                    <span class="result-label">Loser:</span>
-                    <span class="watch-name-history">${record.loser.name}</span>
-                </div>
-            </div>
-        `;
+        // Create round number element
+        const roundNumber = document.createElement('div');
+        roundNumber.className = 'round-number';
+        roundNumber.textContent = `Round ${record.round}`;
+
+        // Create round result container
+        const roundResult = document.createElement('div');
+        roundResult.className = 'round-result';
+
+        // Create winner info
+        const winnerInfo = document.createElement('div');
+        winnerInfo.className = 'winner-info';
+
+        const winnerLabel = document.createElement('span');
+        winnerLabel.className = 'result-label';
+        winnerLabel.textContent = 'Winner:';
+
+        const winnerName = document.createElement('span');
+        winnerName.className = 'watch-name-history';
+        winnerName.textContent = record.winner.name;
+
+        winnerInfo.appendChild(winnerLabel);
+        winnerInfo.appendChild(winnerName);
+
+        // Create loser info
+        const loserInfo = document.createElement('div');
+        loserInfo.className = 'loser-info';
+
+        const loserLabel = document.createElement('span');
+        loserLabel.className = 'result-label';
+        loserLabel.textContent = 'Loser:';
+
+        const loserName = document.createElement('span');
+        loserName.className = 'watch-name-history';
+        loserName.textContent = record.loser.name;
+
+        loserInfo.appendChild(loserLabel);
+        loserInfo.appendChild(loserName);
+
+        // Assemble the structure
+        roundResult.appendChild(winnerInfo);
+        roundResult.appendChild(loserInfo);
+
+        roundItem.appendChild(roundNumber);
+        roundItem.appendChild(roundResult);
 
         historyContainer.appendChild(roundItem);
     });
@@ -653,25 +710,46 @@ function shareOnTwitter() {
     const share = getShareMessage();
     if (!share) return;
 
+    trackEvent('share', {
+        method: 'Twitter',
+        content_type: 'game_result',
+        item_id: currentChampion.name
+    });
+
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(share.text)}&url=${encodeURIComponent(share.url)}&hashtags=${share.hashtags}`;
-    window.open(twitterUrl, '_blank', 'width=550,height=420');
+    const newWindow = window.open(twitterUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+    if (newWindow) newWindow.opener = null;
 }
 
 function shareOnFacebook() {
     const share = getShareMessage();
     if (!share) return;
 
+    trackEvent('share', {
+        method: 'Facebook',
+        content_type: 'game_result',
+        item_id: currentChampion.name
+    });
+
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(share.url)}&quote=${encodeURIComponent(share.text)}`;
-    window.open(facebookUrl, '_blank', 'width=550,height=420');
+    const newWindow = window.open(facebookUrl, '_blank', 'noopener,noreferrer,width=550,height=420');
+    if (newWindow) newWindow.opener = null;
 }
 
 function shareOnWhatsApp() {
     const share = getShareMessage();
     if (!share) return;
 
+    trackEvent('share', {
+        method: 'WhatsApp',
+        content_type: 'game_result',
+        item_id: currentChampion.name
+    });
+
     const whatsappText = `${share.text}\n\n${share.url}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
-    window.open(whatsappUrl, '_blank');
+    const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    if (newWindow) newWindow.opener = null;
 }
 
 function copyLink() {
@@ -679,6 +757,12 @@ function copyLink() {
     if (!share) return;
 
     const fullText = `${share.text}\n\n${share.url}`;
+
+    trackEvent('share', {
+        method: 'Copy Link',
+        content_type: 'game_result',
+        item_id: currentChampion.name
+    });
 
     navigator.clipboard.writeText(fullText).then(() => {
         // Show feedback
@@ -720,5 +804,137 @@ function triggerConfetti() {
     }, 4000);
 }
 
+// Cookie Consent Management
+function checkCookieConsent() {
+    const consent = localStorage.getItem('cookieConsent');
+    if (consent === 'accepted') {
+        analyticsEnabled = true;
+        enableAnalytics();
+    } else if (consent === 'declined') {
+        analyticsEnabled = false;
+    } else {
+        // Show banner if no choice has been made
+        showCookieBanner();
+    }
+}
+
+function showCookieBanner() {
+    const banner = document.getElementById('cookie-consent-banner');
+    if (banner) {
+        banner.classList.remove('hidden');
+    }
+}
+
+function hideCookieBanner() {
+    const banner = document.getElementById('cookie-consent-banner');
+    if (banner) {
+        banner.classList.add('hidden');
+    }
+}
+
+function acceptCookies() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    analyticsEnabled = true;
+    enableAnalytics();
+    hideCookieBanner();
+}
+
+function declineCookies() {
+    localStorage.setItem('cookieConsent', 'declined');
+    analyticsEnabled = false;
+    disableAnalytics();
+    hideCookieBanner();
+}
+
+function enableAnalytics() {
+    if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+            'analytics_storage': 'granted'
+        });
+    }
+}
+
+function disableAnalytics() {
+    if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+            'analytics_storage': 'denied'
+        });
+    }
+}
+
+// Google Analytics event tracking helper
+function trackEvent(eventName, eventParams = {}) {
+    if (analyticsEnabled && typeof gtag !== 'undefined') {
+        gtag('event', eventName, eventParams);
+    }
+}
+
+// Set up event listeners
+function setupEventListeners() {
+    // Mode selection buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const mode = e.currentTarget.dataset.mode;
+            selectGameMode(mode);
+        });
+    });
+
+    // Watch card selections
+    const cardLeft = document.getElementById('card-left');
+    const cardRight = document.getElementById('card-right');
+
+    if (cardLeft) {
+        cardLeft.addEventListener('click', () => selectWinner('left'));
+    }
+    if (cardRight) {
+        cardRight.addEventListener('click', () => selectWinner('right'));
+    }
+
+    // Restart buttons
+    const headerRestartBtn = document.getElementById('header-restart-btn');
+    const winnerRestartBtn = document.getElementById('winner-restart-btn');
+
+    if (headerRestartBtn) {
+        headerRestartBtn.addEventListener('click', restartGame);
+    }
+    if (winnerRestartBtn) {
+        winnerRestartBtn.addEventListener('click', restartGame);
+    }
+
+    // Share buttons
+    const shareTwitter = document.getElementById('share-twitter');
+    const shareFacebook = document.getElementById('share-facebook');
+    const shareWhatsApp = document.getElementById('share-whatsapp');
+    const shareCopy = document.getElementById('share-copy');
+
+    if (shareTwitter) {
+        shareTwitter.addEventListener('click', shareOnTwitter);
+    }
+    if (shareFacebook) {
+        shareFacebook.addEventListener('click', shareOnFacebook);
+    }
+    if (shareWhatsApp) {
+        shareWhatsApp.addEventListener('click', shareOnWhatsApp);
+    }
+    if (shareCopy) {
+        shareCopy.addEventListener('click', copyLink);
+    }
+
+    // Cookie consent buttons
+    const cookieAccept = document.getElementById('cookie-accept');
+    const cookieDecline = document.getElementById('cookie-decline');
+
+    if (cookieAccept) {
+        cookieAccept.addEventListener('click', acceptCookies);
+    }
+    if (cookieDecline) {
+        cookieDecline.addEventListener('click', declineCookies);
+    }
+}
+
 // Start the game when page loads
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded', () => {
+    checkCookieConsent(); // Check cookie consent first
+    init();
+    setupEventListeners();
+});

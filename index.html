@@ -1,8 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6T65P396MZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+
+      // Set default consent to denied
+      gtag('consent', 'default', {
+        'analytics_storage': 'denied'
+      });
+
+      gtag('js', new Date());
+      gtag('config', 'G-6T65P396MZ', {
+        'anonymize_ip': true  // IP anonymization for privacy
+      });
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self' https://docs.google.com https://www.google-analytics.com https://region1.google-analytics.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
 
     <!-- Primary Meta Tags -->
     <title>The Watch Match - Interactive Watch Comparison Game | Find Your Perfect Timepiece</title>
@@ -97,25 +121,25 @@
                     </div>
                     <h2>Choose your battle mode to start</h2>
                     <div class="mode-buttons">
-                        <button class="mode-btn" onclick="selectGameMode('brand')">
+                        <button class="mode-btn" data-mode="brand">
                             <div class="mode-icon">🏷️</div>
                             <h3>Same Brand</h3>
                             <p>Battle watches from the same brand</p>
                         </button>
 
-                        <button class="mode-btn" onclick="selectGameMode('price')">
+                        <button class="mode-btn" data-mode="price">
                             <div class="mode-icon">💰</div>
                             <h3>Similar Price</h3>
                             <p>Battle watches in similar price ranges</p>
                         </button>
 
-                        <button class="mode-btn" onclick="selectGameMode('style')">
+                        <button class="mode-btn" data-mode="style">
                             <div class="mode-icon">⚡</div>
                             <h3>Same Style</h3>
                             <p>Battle watches with the same style</p>
                         </button>
 
-                        <button class="mode-btn" onclick="selectGameMode('random')">
+                        <button class="mode-btn" data-mode="random">
                             <div class="mode-icon">🎲</div>
                             <h3>Random</h3>
                             <p>Battle any watches randomly</p>
@@ -129,7 +153,7 @@
                 <p class="battle-mode-indicator" id="battle-mode-indicator"></p>
                 <p class="battle-prompt">Choose your favorite watch!</p>
                 <div class="cards-container">
-                    <div class="watch-card" id="card-left" data-position="left" onclick="selectWinner('left')">
+                    <div class="watch-card" id="card-left" data-position="left">
                         <div class="watch-image-container">
                             <img src="" alt="" id="watch-image-left" class="watch-image">
                         </div>
@@ -140,7 +164,7 @@
                         <span>VS</span>
                     </div>
 
-                    <div class="watch-card" id="card-right" data-position="right" onclick="selectWinner('right')">
+                    <div class="watch-card" id="card-right" data-position="right">
                         <div class="watch-image-container">
                             <img src="" alt="" id="watch-image-right" class="watch-image">
                         </div>
@@ -152,7 +176,7 @@
                 <div class="progress-container">
                     <p class="round-indicator">Round <span id="current-round">1</span> of 10</p>
                     <div class="progress-dots" id="progress-dots"></div>
-                    <button class="header-restart-btn" onclick="restartGame()">Play Again</button>
+                    <button class="header-restart-btn" id="header-restart-btn">Play Again</button>
                 </div>
             </section>
 
@@ -181,23 +205,23 @@
                         <h3 class="share-title">Share Your Result!</h3>
                         <p class="share-subtitle">Challenge your friends to find their perfect watch</p>
                         <div class="share-buttons">
-                            <button class="share-btn twitter-btn" onclick="shareOnTwitter()" aria-label="Share on X">
+                            <button class="share-btn twitter-btn" id="share-twitter" aria-label="Share on X">
                                 <span class="share-icon">𝕏</span>
                             </button>
-                            <button class="share-btn facebook-btn" onclick="shareOnFacebook()" aria-label="Share on Facebook">
+                            <button class="share-btn facebook-btn" id="share-facebook" aria-label="Share on Facebook">
                                 <span class="share-icon">f</span>
                             </button>
-                            <button class="share-btn whatsapp-btn" onclick="shareOnWhatsApp()" aria-label="Share on WhatsApp">
+                            <button class="share-btn whatsapp-btn" id="share-whatsapp" aria-label="Share on WhatsApp">
                                 <span class="share-icon">💬</span>
                             </button>
-                            <button class="share-btn copy-btn" onclick="copyLink()" aria-label="Copy Link">
+                            <button class="share-btn copy-btn" id="share-copy" aria-label="Copy Link">
                                 <span class="share-icon">🔗</span>
                             </button>
                         </div>
                         <p class="copy-feedback" id="copy-feedback"></p>
                     </div>
 
-                    <button class="restart-btn" onclick="restartGame()">Play Again</button>
+                    <button class="restart-btn" id="winner-restart-btn">Play Again</button>
                 </div>
             </section>
         </main>
@@ -210,6 +234,20 @@
                 <a href="terms.html" class="footer-link">Terms of Service</a>
             </p>
         </footer>
+
+        <!-- Cookie Consent Banner -->
+        <div id="cookie-consent-banner" class="cookie-consent-banner hidden">
+            <div class="cookie-consent-content">
+                <p class="cookie-consent-text">
+                    We use cookies and analytics to improve your experience. By continuing to use our site, you accept our use of cookies.
+                    <a href="privacy.html" class="cookie-consent-link">Learn more</a>
+                </p>
+                <div class="cookie-consent-buttons">
+                    <button id="cookie-accept" class="cookie-btn cookie-accept">Accept</button>
+                    <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
