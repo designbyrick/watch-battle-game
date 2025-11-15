@@ -1,6 +1,11 @@
 // Cookie Consent State
 let analyticsEnabled = false;
 
+// Image Preloading System
+const imageCache = new Map(); // Cache for loaded images
+const preloadQueue = []; // Queue of images to preload
+let isPreloading = false;
+
 // Game State
 let allWatches = [];
 let gameWatches = []; // Filtered watches based on game mode
@@ -512,15 +517,134 @@ function getRandomPair() {
     return { left, right };
 }
 
-// Display watches on cards
-function displayWatches(leftWatch, rightWatch) {
-    watchImageLeft.src = leftWatch.image;
-    watchImageLeft.alt = `${leftWatch.name} luxury watch - Compare and choose in Watch Battle`;
-    watchNameLeft.textContent = leftWatch.name;
+// Preload a single image
+function preloadImage(url) {
+    return new Promise((resolve, reject) => {
+        // Check if already in cache
+        if (imageCache.has(url)) {
+            resolve(url);
+            return;
+        }
 
-    watchImageRight.src = rightWatch.image;
-    watchImageRight.alt = `${rightWatch.name} luxury watch - Compare and choose in Watch Battle`;
+        const img = new Image();
+
+        img.onload = () => {
+            imageCache.set(url, img);
+            resolve(url);
+        };
+
+        img.onerror = () => {
+            console.warn(`Failed to preload image: ${url}`);
+            reject(url);
+        };
+
+        img.src = url;
+    });
+}
+
+// Preload next rounds' images in background
+async function preloadUpcomingImages() {
+    if (isPreloading) return;
+    isPreloading = true;
+
+    const imagesToPreload = [];
+    const preloadCount = Math.min(4, totalRounds - currentRound + 1); // Preload next 4 rounds
+
+    // Get next pairs and collect their images
+    const tempUsedWatches = [...usedWatches];
+    const tempChampion = currentChampion;
+
+    for (let i = 0; i < preloadCount; i++) {
+        const availableWatches = gameWatches.filter(w => !tempUsedWatches.includes(w));
+        if (availableWatches.length === 0) break;
+
+        // Simulate next matchups
+        const nextWatch = availableWatches[Math.floor(Math.random() * availableWatches.length)];
+        tempUsedWatches.push(nextWatch);
+
+        if (nextWatch && nextWatch.image && !imageCache.has(nextWatch.image)) {
+            imagesToPreload.push(nextWatch.image);
+        }
+    }
+
+    // Preload all images in parallel
+    try {
+        await Promise.all(imagesToPreload.map(url => preloadImage(url)));
+    } catch (error) {
+        console.warn('Some images failed to preload:', error);
+    }
+
+    isPreloading = false;
+}
+
+// Display watches on cards with loading states
+function displayWatches(leftWatch, rightWatch) {
+    // Add loading class
+    cardLeft.classList.add('loading');
+    cardRight.classList.add('loading');
+
+    // Set text immediately
+    watchNameLeft.textContent = leftWatch.name;
     watchNameRight.textContent = rightWatch.name;
+
+    let leftLoaded = false;
+    let rightLoaded = false;
+
+    function checkBothLoaded() {
+        if (leftLoaded && rightLoaded) {
+            cardLeft.classList.remove('loading');
+            cardRight.classList.remove('loading');
+            cardLeft.classList.add('loaded');
+            cardRight.classList.add('loaded');
+
+            // Remove loaded class after animation
+            setTimeout(() => {
+                cardLeft.classList.remove('loaded');
+                cardRight.classList.remove('loaded');
+            }, 300);
+        }
+    }
+
+    // Load left image
+    if (imageCache.has(leftWatch.image)) {
+        watchImageLeft.src = leftWatch.image;
+        leftLoaded = true;
+        checkBothLoaded();
+    } else {
+        preloadImage(leftWatch.image).then(() => {
+            watchImageLeft.src = leftWatch.image;
+            leftLoaded = true;
+            checkBothLoaded();
+        }).catch(() => {
+            watchImageLeft.src = leftWatch.image; // Try anyway
+            leftLoaded = true;
+            checkBothLoaded();
+        });
+    }
+
+    watchImageLeft.alt = `${leftWatch.name} luxury watch - Compare and choose in Watch Battle`;
+
+    // Load right image
+    if (imageCache.has(rightWatch.image)) {
+        watchImageRight.src = rightWatch.image;
+        rightLoaded = true;
+        checkBothLoaded();
+    } else {
+        preloadImage(rightWatch.image).then(() => {
+            watchImageRight.src = rightWatch.image;
+            rightLoaded = true;
+            checkBothLoaded();
+        }).catch(() => {
+            watchImageRight.src = rightWatch.image; // Try anyway
+            rightLoaded = true;
+            checkBothLoaded();
+        });
+    }
+
+    watchImageRight.alt = `${rightWatch.name} luxury watch - Compare and choose in Watch Battle`;
+
+    // Start preloading upcoming images
+    preloadUpcomingImages();
 }
 
 // Handle winner selection
